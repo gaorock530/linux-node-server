@@ -34,7 +34,7 @@ MongoClient.connect('mongodb://localhost:27017/database', (e, data) => {
   // });
   var fatch = {completed: false};
 
-  data.collection('todos').find(fatch).count().then((docs) => {
+  data.collection('todos').find().toArray().then((docs) => {
     console.log('collection: todos');
     console.log(JSON.stringify(docs, undefined, 2));
   }, (err) => {
