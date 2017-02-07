@@ -5,6 +5,8 @@ const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo.js');
 const {User} = require('./models/user.js');
 const {ObjectId} = require('mongodb');
+const bcrypt = require('bcryptjs');
+const {authenticate} = require('./middleware/authenticate');
 
 var app = express();
 
@@ -105,6 +107,25 @@ app.get('/users', (req,res) => {
   User.find().then((users) => {
     res.send({users});
   }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
+
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+});
+
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(`User: ${user.email} has logged in!`);
+    });
+
+  }).catch((e) => {
     res.status(400).send(e);
   });
 });
