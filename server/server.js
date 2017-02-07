@@ -1,63 +1,33 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/database');
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo.js');
+const {User} = require('./models/user.js');
 
-//build a mongoose model
-var Todo = mongoose.model('Todo', {
-  text: {
-    type: String,
-    required: true,
-    minlength: 2,
-    trim: true
-  },
-  completed: {
-    type: Boolean,
-    default: false
-  },
-  completedAt: {
-    type: Number,
-    default: null
-  }
+var app = express();
+
+app.use(bodyParser.json());
+
+app.get('/', (req, res) => {
+  res.send('hello');
 });
 
-// var newTodo = new Todo({
-//   text: 'edit this video'
-// });
-//
-// newTodo.save().then((data) => {
-//   console.log('Saved Todo...');
-//   console.log(data);
-// }, (e) => {
-//   console.log('Unable to save data!', e);
-// });
+app.post('/todos', (req, res) => {
+  //console.log(req.body);
+  var todo = new Todo({
+    text: req.body.text
+  });
 
-const User = mongoose.model('User', {
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    minlength: 3
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 10
-  },
-  createdAt: {
-    type: Number,
-    default: 123456
-  }
+  todo.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.status(400).send(e);
+  });
 });
 
-var user1 = new User({
-  email: 'gaorock530@hotmail.com',
-  password: 'abc123456789'
+app.listen(3000, (con) => {
+  console.log('Connected no port: 3000');
 });
 
-user1.save().then((data) => {
-  console.log('Saved Todo...');
-  console.log(data);
-}, (e) => {
-  console.log('Unable to save data!', e);
-});
+module.exports = {app};
